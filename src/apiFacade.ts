@@ -28,6 +28,8 @@ interface GeminiVertexResponseBody {
 	}>;
 }
 
+const MAX_ERROR_BODY_LENGTH = 500;
+
 export class AnthropicApi implements ApiFacade {
 	async create(apiKey: string | undefined, request: string, provider: ChatModel, content: Buffer[], mimeType: string, isUrl?: boolean): Promise<string[]> {
 		try {
@@ -173,7 +175,7 @@ export class GeminiApi implements ApiFacade {
 			});
 			if (!response.ok) {
 				const errorBody = await response.text();
-				const safeErrorBody = errorBody.slice(0, 500);
+				const safeErrorBody = errorBody.slice(0, MAX_ERROR_BODY_LENGTH);
 				throw new Error(`Gemini Vertex request failed with status ${response.status} (${response.statusText}). Response excerpt: ${safeErrorBody}`);
 			}
 			const responseBody = await response.json() as GeminiVertexResponseBody;
