@@ -27,7 +27,7 @@ function getMimeType(ext: string) {
 }
 
 
-export async function generateAltText(model: ChatModel, apiKey: string, imagePath: string, isHtml: boolean, type: 'concise' | 'refine', refineResult: boolean, isUrl?: boolean): Promise<string | undefined> {
+export async function generateAltText(model: ChatModel, apiKey: string | undefined, imagePath: string, isHtml: boolean, type: 'concise' | 'refine', refineResult: boolean, isUrl?: boolean): Promise<string | undefined> {
 	let query = 'Generate concise alt text for this image, focusing on key elements while omitting unnecessary visual details, such as colors. Do not include single or double quotes in the alt text.';
 	if (type === 'refine') {
 		const userQuery = await vscode.window.showInputBox({
