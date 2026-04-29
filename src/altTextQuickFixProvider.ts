@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import path from 'path';
 import { extractImageAttributes } from './utils/imageUtils';
 import { generateAltText } from './utils/vscodeImageUtils';
-import { initializeModelAndToken } from './extension';
+import { initializeModelAndToken, isApiKeyRequired } from './extension';
 
 interface ImageCodeAction extends vscode.CodeAction {
 	document: vscode.TextDocument;
@@ -81,7 +81,7 @@ export class AltTextQuickFixProvider implements vscode.CodeActionProvider<ImageC
 
 		const { currentToken, currentModel } = await initializeModelAndToken(undefined, this.context);
 
-		if (!currentModel || !currentToken) {
+		if (!currentModel || (isApiKeyRequired(currentModel.provider) && !currentToken)) {
 			return;
 		}
 

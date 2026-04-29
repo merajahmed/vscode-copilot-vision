@@ -41,7 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		let { currentModel, currentToken } = await initializeModelAndToken(stream, context);
 
-		if (!currentModel || !currentToken) {
+		if (!currentModel || (isApiKeyRequired(currentModel.provider) && !currentToken)) {
 			throw new Error('Something went wrong in the auth flow.');
 		}
 
@@ -151,7 +151,10 @@ export async function initializeModelAndToken(stream?: vscode.ChatResponseStream
 
 	let contextToken: string | undefined;
 
-	stream?.progress(`Setting ${chatModel.provider} API key...`);
+	stream?.progress(`Setting ${chatModel.provider} credentials...`);
+	if (!isApiKeyRequired(chatModel.provider)) {
+		return { currentToken: undefined, currentModel: chatModel };
+	}
 	
 	const key = await context?.secrets.get(chatModel.provider as ProviderType);
 	if (key) {
@@ -169,6 +172,21 @@ export async function initializeModelAndToken(stream?: vscode.ChatResponseStream
 	return { currentToken: contextToken, currentModel: chatModel };
 }
 
+export function isApiKeyRequired(provider: ProviderType): boolean {
+	const config = vscode.workspace.getConfiguration();
+	if (provider === ProviderType.AzureOpenAI) {
+		const azureAuthType = config.get<'apiKey' | 'entraId'>('copilot.vision.azureAuthType') || 'apiKey';
+		return azureAuthType === 'apiKey';
+	}
+
+	if (provider === ProviderType.Gemini) {
+		const geminiAuthType = config.get<'apiKey' | 'applicationDefault'>('copilot.vision.geminiAuthType') || 'apiKey';
+		return geminiAuthType === 'apiKey';
+	}
+
+	return true;
+}
+
 export function getModel(): ChatModel {
 	const config = vscode.workspace.getConfiguration();
 	const currentModel = config.get<string>('copilot.vision.model');
@@ -181,6 +199,10 @@ export function subscribe(context: vscode.ExtensionContext) {
 		const auth = new BaseAuth();
 		const provider = getModel().provider;
 		if (provider) {
+			if (!isApiKeyRequired(provider)) {
+				vscode.window.showInformationMessage(vscode.l10n.t('API key is not required for the current provider authentication mode.'));
+				return;
+			}
 			await auth.setAPIKey(provider, context);
 		}
 	}));
@@ -271,7 +293,7 @@ export function subscribe(context: vscode.ExtensionContext) {
 			});
 
 			await config.update('copilot.vision.model', key || chatModel.model, vscode.ConfigurationTarget.Global);
-			if (!currentKey) {
+			if (!currentKey && isApiKeyRequired(selectedModel.label as ProviderType)) {
 				await vscode.commands.executeCommand('copilot.vision.setApiKey');
 			}
 		} catch (e) {

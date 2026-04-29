@@ -21,8 +21,13 @@ Additionally, users can generate or refine alt text for images in markdown, HTML
 - Troubleshoot (screenshots the VS Code window and sends it to chat).
 
 ### Settings
-- `copilot.vision.provider`: The selected provider (currently limted to OpenAI, Anthropic, and Gemini).
+- `copilot.vision.provider`: The selected provider (OpenAI, Anthropic, Gemini, AzureOpenAI).
 - `copilot.vision.model`: The model for the currently selected provider.
+- `copilot.vision.azureEndpoint`: Endpoint for Azure OpenAI.
+- `copilot.vision.azureAuthType`: `apiKey` or `entraId` for Azure OpenAI auth.
+- `copilot.vision.geminiAuthType`: `apiKey` or `applicationDefault` for Gemini auth.
+- `copilot.vision.geminiProject`: Google Cloud project ID (required for Gemini `applicationDefault`).
+- `copilot.vision.geminiLocation`: Google Cloud location for Gemini `applicationDefault` (default `us-central1`).
 
 ### Notes
 - For each of the providers, users may be required to have credit in their respective accounts already, or the API key will be invalid.
@@ -41,9 +46,19 @@ Additionally, users can generate or refine alt text for images in markdown, HTML
   a. Go to `https://ai.azure.com/`
   b. Choose "Deployments" from the options.
   c. Create a deployment if you don't have one. 
-  d. Click on the Name of the depoloyment. Here you'll be able to see the Target URI and Key.
-  e. In VS Code, set `copilot.vision.azureEndpoint` to your Target URI.
-  f. In VS Code, run "Copilot Vision: Set Current Model's API Key" and paste the key from step d.
+   d. Click on the Name of the depoloyment. Here you'll be able to see the Target URI and Key.
+   e. In VS Code, set `copilot.vision.azureEndpoint` to your Target URI.
+   f. Choose one auth mode:
+      - API key: set `copilot.vision.azureAuthType` to `apiKey`, then run "Copilot Vision: Set Current Model's API Key" and paste the key from step d.
+      - Microsoft Entra ID / service principal: set `copilot.vision.azureAuthType` to `entraId` and authenticate with credentials available to `DefaultAzureCredential` (for example `az login`, service principal env vars, or managed identity).
+
+# How do I use Gemini with gcloud application-default credentials?
+1. In VS Code, set `"copilot.vision.provider": "Gemini"`.
+2. Set `copilot.vision.geminiAuthType` to `applicationDefault`.
+3. Set `copilot.vision.geminiProject` to your Google Cloud project ID.
+4. Optionally set `copilot.vision.geminiLocation` (defaults to `us-central1`).
+5. Run `gcloud auth application-default login`.
+6. Use a Vertex AI Gemini model name (for example `gemini-1.5-pro`).
 
 ## Trademarks
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow Microsoft's Trademark & Brand Guidelines. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
