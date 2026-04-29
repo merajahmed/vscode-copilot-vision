@@ -235,7 +235,7 @@ export class AzureOpenAIApi implements ApiFacade {
 			const result = await client.chat.completions.create({
 				messages: prompts,
 				model,
-				max_tokens: 4096,
+				max_completion_tokens: 4096,
 				temperature: 0.7,
 				top_p: 0.95,
 				frequency_penalty: 0,
