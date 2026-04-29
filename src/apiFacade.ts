@@ -146,7 +146,7 @@ export class GeminiApi implements ApiFacade {
 			const location = config.get<string>('copilot.vision.geminiLocation') || 'us-central1';
 
 			if (!project) {
-				return ['Please set copilot.vision.geminiProject to use gcloud application-default credentials.'];
+				return ['Please set the "copilot.vision.geminiProject" setting to use gcloud application-default credentials.'];
 			}
 
 			const auth = new GoogleAuth({
@@ -173,7 +173,8 @@ export class GeminiApi implements ApiFacade {
 			});
 			if (!response.ok) {
 				const errorBody = await response.text();
-				throw new Error(`Gemini Vertex request failed with status ${response.status} (${response.statusText}): ${errorBody}`);
+				const safeErrorBody = errorBody.slice(0, 500);
+				throw new Error(`Gemini Vertex request failed with status ${response.status} (${response.statusText}). Response excerpt: ${safeErrorBody}`);
 			}
 			const responseBody = await response.json() as GeminiVertexResponseBody;
 
