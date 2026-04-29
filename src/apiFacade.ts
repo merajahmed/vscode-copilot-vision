@@ -137,7 +137,8 @@ export class GeminiApi implements ApiFacade {
 				const genAI = new GoogleGenerativeAI(apiKey);
 				const model = genAI.getGenerativeModel({ model: provider.model }); // 'gemini-1.5-flash'
 				const result = await model.generateContent([request, ...imageParts]);
-				return [result.response.text()];
+				const messageText = result.response.text();
+				return messageText ? [messageText] : [];
 			}
 
 			const config = vscode.workspace.getConfiguration();
@@ -180,7 +181,7 @@ export class GeminiApi implements ApiFacade {
 			const messages = candidates
 				.flatMap((candidate) => candidate.content?.parts ?? [])
 				.map((part) => part.text)
-				.filter((text: string | undefined): text is string => Boolean(text));
+				.filter((text: string | undefined): text is string => text !== undefined);
 			return [messages.join('')];
 		} catch (error) {
 			console.error('Error in GeminiApi:', error);
