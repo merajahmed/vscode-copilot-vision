@@ -171,7 +171,8 @@ export class GeminiApi implements ApiFacade {
 				}
 			});
 			if (!response.ok) {
-				throw new Error(`Gemini Vertex request failed with status ${response.status}`);
+				const errorBody = await response.text();
+				throw new Error(`Gemini Vertex request failed with status ${response.status} (${response.statusText}): ${errorBody}`);
 			}
 			const responseBody = await response.json() as GeminiVertexResponseBody;
 
@@ -180,7 +181,7 @@ export class GeminiApi implements ApiFacade {
 				.flatMap((candidate) => candidate.content?.parts ?? [])
 				.map((part) => part.text)
 				.filter((text: string | undefined): text is string => Boolean(text));
-			return messages;
+			return [messages.join('')];
 		} catch (error) {
 			console.error('Error in GeminiApi:', error);
 			throw error;
