@@ -46,7 +46,7 @@ Additionally, users can generate or refine alt text for images in markdown, HTML
   a. Go to `https://ai.azure.com/`
   b. Choose "Deployments" from the options.
   c. Create a deployment if you don't have one. 
-   d. Click on the Name of the depoloyment. Here you'll be able to see the Target URI and Key.
+   d. Click on the Name of the deployment. Here you'll be able to see the Target URI and Key.
    e. In VS Code, set `copilot.vision.azureEndpoint` to your Target URI.
    f. Choose one auth mode:
       - API key: set `copilot.vision.azureAuthType` to `apiKey`, then run "Copilot Vision: Set Current Model's API Key" and paste the key from step d.

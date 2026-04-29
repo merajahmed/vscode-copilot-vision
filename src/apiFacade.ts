@@ -18,6 +18,16 @@ export interface ApiFacade {
 	create(apiKey: string | undefined, request: string, provider: ChatModel, content: Buffer[], mimeType: string, isUrl?: boolean, url?: string): Promise<string[]>;
 }
 
+interface GeminiVertexResponseBody {
+	candidates?: Array<{
+		content?: {
+			parts?: Array<{
+				text?: string;
+			}>;
+		};
+	}>;
+}
+
 export class AnthropicApi implements ApiFacade {
 	async create(apiKey: string | undefined, request: string, provider: ChatModel, content: Buffer[], mimeType: string, isUrl?: boolean): Promise<string[]> {
 		try {
@@ -146,7 +156,10 @@ export class GeminiApi implements ApiFacade {
 				throw new Error('Failed to retrieve Google access token.');
 			}
 
-			const endpoint = `https://${encodeURIComponent(location)}-aiplatform.googleapis.com/v1/projects/${encodeURIComponent(project)}/locations/${encodeURIComponent(location)}/publishers/google/models/${encodeURIComponent(provider.model)}:generateContent`;
+			const encodedLocation = encodeURIComponent(location);
+			const encodedProject = encodeURIComponent(project);
+			const encodedModel = encodeURIComponent(provider.model);
+			const endpoint = `https://${encodedLocation}-aiplatform.googleapis.com/v1/projects/${encodedProject}/locations/${encodedLocation}/publishers/google/models/${encodedModel}:generateContent`;
 			const response = await fetch(endpoint, {
 				method: 'POST',
 				body: JSON.stringify({
@@ -160,12 +173,12 @@ export class GeminiApi implements ApiFacade {
 			if (!response.ok) {
 				throw new Error(`Gemini Vertex request failed with status ${response.status}`);
 			}
-			const responseBody: any = await response.json();
+			const responseBody = await response.json() as GeminiVertexResponseBody;
 
 			const candidates = responseBody?.candidates ?? [];
 			const messages = candidates
-				.flatMap((candidate: any) => candidate?.content?.parts ?? [])
-				.map((part: any) => part?.text)
+				.flatMap((candidate) => candidate.content?.parts ?? [])
+				.map((part) => part.text)
 				.filter((text: string | undefined): text is string => Boolean(text));
 			return messages;
 		} catch (error) {
